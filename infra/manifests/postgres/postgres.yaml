@@ -29,7 +29,7 @@ spec:
     spec:
       securityContext:
         runAsNonRoot: true
-        runAsUser: 70    # postgres:alpine uses UID 70 (Debian uses 999)
+        runAsUser: 70 # postgres:alpine uses UID 70 (Debian uses 999)
         fsGroup: 70
       containers:
         - name: postgres
@@ -75,6 +75,16 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: postgres-pvc
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: In
+                    values:
+                      - k8s-worker1
+                      - k8s-worker2
 ---
 apiVersion: v1
 kind: Service
@@ -87,4 +97,4 @@ spec:
   ports:
     - port: 5432
       targetPort: 5432
-  clusterIP: None  # headless — required for StatefulSet stable DNS
+  clusterIP: None # headless — required for StatefulSet stable DNS
